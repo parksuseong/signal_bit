@@ -1,6 +1,6 @@
 import DataModel
 import TelegramModel
-
+##
 def get_rsi_message(periods):
     dm_instance = DataModel.DataModel(periods=periods)
     rsi_message = dm_instance.judge_rsi()
