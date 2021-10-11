@@ -8,7 +8,7 @@ def get_rsi_message(periods):
 
 if __name__ == '__main__':
     bot = TelegramModel.TelegramModel()
-    for period in ['1m','5m','15m','30m','1h','4h','1d']:
+    for period in ['5m','15m','30m','1h','4h']:
         text = get_rsi_message(period)
         if text != "":
             bot.send_message(text)
