@@ -12,13 +12,13 @@ pd.set_option('display.max_columns',10)
 
 class DataModel():
 
-    def __init__(self, periods='1d'):
+    def __init__(self, periods):
         self.binance = ccxt.binance()
         self.periods = periods
         self.cur_rsi = 0
 
     #바낸 데이터 긁어오기
-    def get_data(self, exchange):
+    def get_data(self, exchange='binance'):
         #현재는 exchange가 바낸만 구현
         ohlcvs = self.binance.fetch_ohlcv('BTC/USDT', self.periods)
         #일자, 시가, 고가, 저가, 종가, 거래량
@@ -51,7 +51,7 @@ class DataModel():
         return result #마감 전은 제외
 
 
-    def get_over_trade(self, df, periods):
+    def get_over_trade(self, df):
         if df['rsi'] > 90: #초초과매수
             return 3
         elif df['rsi'] > 80: #초과매수
@@ -67,20 +67,20 @@ class DataModel():
         else:
             return 0 #보통
 
-    def get_cur_rsi(self, df, periods):#현재 rsi 반환
+    def get_cur_rsi(self, df):#현재 rsi 반환
         self.cur_rsi = df['rsi'].iloc[-1]
         return self.cur_rsi
 
-    def get_cur_date(self, df, periods):
+    def get_cur_date(self, df):
         self.cur_date = df.index[-1]
         return self.cur_date
 
 
     def judge_rsi(self):
-        df_rsi= self.get_rsi(self.get_data(self.periods))
-        over_trade_val = self.get_over_trade(df_rsi.iloc[-1], self.periods)
-        cur_rsi = self.get_cur_rsi(df_rsi[:-1],self.periods)
-        cur_date = self.get_cur_date(df_rsi[:-1],self.periods)
+        df_rsi= self.get_rsi(self.get_data())
+        over_trade_val = self.get_over_trade(df_rsi.iloc[-1])
+        cur_rsi = self.get_cur_rsi(df_rsi[:-1])
+        cur_date = self.get_cur_date(df_rsi[:-1])
         result=self.periods + " / " + str(cur_date) + " / rsi : " + str(cur_rsi) + " / 상태 : "
         if over_trade_val == 3:
             result += "초초과매수 진입"
