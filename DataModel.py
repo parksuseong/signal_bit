@@ -95,7 +95,7 @@ class DataModel():
         elif over_trade_val == -1:
             result += "과매도 진입"
         else:
-            result = ""
+            result = "평상시"
         return result
 
 
