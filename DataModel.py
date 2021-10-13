@@ -98,6 +98,9 @@ class DataModel():
             result = "평상시"
         return result
 
+    def get_divergence(self, df):
+        
+        return 1
 
 
 #df_rsi= get_rsi(get_data('1h'))
