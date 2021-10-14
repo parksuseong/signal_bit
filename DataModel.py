@@ -18,7 +18,11 @@ class DataModel():
             #add rsi
             self.calc_rsi()
 
-            self.cal_divergence()
+            self.cal_ma(7)
+            self.cal_rsi_ma(7)
+            
+
+            #self.cal_divergence()
         else: #realtime use async 
             print('realtime type model start')
 
@@ -88,12 +92,24 @@ class DataModel():
         
         #result = pd.DataFrame(result, columns=['datetime', 'open','high','low','close','vol','rsi'])
         self.df.columns = ['datetime','open','high','low','close','vol','rsi']
+
+    #calculate ma_%
+    def cal_ma(self,periods):
+        col_nm="ma_{}".format(periods)
+        col_df = self.df['close'].rolling(window=periods).mean()
+        self.df.insert(len(self.df.columns), col_nm, col_df)
+
+    def cal_rsi_ma(self,periods):
+        col_nm="rsi_ma_{}".format(periods)
+        col_df = self.df['rsi'].rolling(window=periods).mean()
+        self.df.insert(len(self.df.columns), col_nm, col_df)
     
     #마감봉은 현재 기준 60개 보는것으로 set.
     #현재 다이버전스 상태 여부 리턴 (히든다이버전스 등은 미판단. 그냥 내맘대로 함.)
     #상승다이버전스는 저점은 하락하는데 rsi는 상승하는 상태
     #하락다이버전스는 고점은 상승하는데 rsi는 하락하는 상태
-    def cal_divergence(self, lower_barrier=30, upper_barrier=70, width=30):
+    def cal_divergence(self, lower_barrier=30, upper_barrier=70, width=14):
+        #수정할꺼임.. 갑자기 하고싶어진게 있음.
         latest_rsi=self.df['rsi'].iloc[-2]
         latest_high=self.df['high'].iloc[-2]
         latest_rsi_low=self.df['low'].iloc[-2]
@@ -101,6 +117,7 @@ class DataModel():
         self.df['diver_down'] = 0
 
         #bullish
+        
         for i in range(0,len(self.df.index)):        
             try: 
                 if self.df['rsi'][i] < lower_barrier:
@@ -127,7 +144,7 @@ class DataModel():
             except IndexError:
                 pass
         
-        for i in range(0,len(self.df.index)):               
+        for i in range(0,len(self.df.index)-width):               
             try:
                 if self.df['rsi'][i] > upper_barrier:
                     for a in range(i + 1, i + width):
@@ -195,8 +212,9 @@ class DataModel():
 
 #test
 dm = DataModel(periods='1d', op_type='batch')
-#dm.print_df()
-dm.save_df_csv()
+
+dm.print_df()
+#dm.save_df_csv()
 #print(dm.df)
 #print(dm.get_cur_low())
 #print(dm.get_cur_high())
