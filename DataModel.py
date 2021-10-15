@@ -36,7 +36,7 @@ class DataModel():
 
         #init method call
         if op_type == 'batch':
-            print('batch type model start')
+            print(self.periods + ' batch type model start')
             #data load
             self.get_origin_data()
             #add rsi
@@ -45,9 +45,9 @@ class DataModel():
             self.cal_ma(7)
             self.cal_rsi_ma(7)
 
-            self.cal_lastest_upper_divergence()
-            self.cal_lastest_down_divergence()
-            self.print_lastest_divergence()
+            #self.cal_lastest_upper_divergence()
+            #self.cal_lastest_down_divergence()
+            #self.print_lastest_divergence()
             
         else: #realtime use async 
             print('realtime type model start')
