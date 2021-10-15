@@ -3,6 +3,7 @@ import TelegramModel
 
 def get_rsi_message(periods):
     dm_instance = DataModel.DataModel(periods=periods)
+    divergence = 0
     divergence = dm_instance.get_cur_divergence()
     periods = dm_instance.periods
     dm_instance.cur_diver_experimental_datetime
@@ -16,12 +17,12 @@ def get_rsi_message(periods):
     rsi_message = rsi_message + "\n"
     rsi_message = rsi_message + "비교:" + dm_instance.cur_diver_control_datetime + "/price:" + dm_instance.cur_diver_control_price + "/rsi:" + dm_instance.cur_diver_control_rsi
 
-    if divergence > 0 :#upper
+    if divergence == 1 :#upper
         return periods + "봉 상승 다이버 포착 \n" + rsi_message
-    elif divergence < 0:
+    elif divergence == -1:
         return periods + "봉 하락 다이버 포착 \n" + rsi_message
     else:
-        return rsi_message
+        return ""
     
 
 if __name__ == '__main__':
