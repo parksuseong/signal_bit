@@ -9,6 +9,17 @@ class DataModel():
     def __init__(self, periods='1d', op_type='batch'):
         self.binance = ccxt.binance()
         self.periods = periods
+        
+        #current divergence variable
+        self.divergence=0 #zero not, plus upper, minus down
+        self.cur_diver_experimental_datetime=''
+        self.cur_diver_control_datetime=''
+        self.cur_diver_experimental_rsi=''
+        self.cur_diver_control_rsi=''
+        self.cur_diver_experimental_price=''
+        self.cur_diver_control_price=''
+        
+        #latest divergence variable
         self.lastest_upper_diver_experimental_datetime=''
         self.lastest_upper_diver_control_datetime=''
         self.lastest_upper_diver_experimental_rsi=''
@@ -21,6 +32,7 @@ class DataModel():
         self.lastest_down_diver_control_rsi=''
         self.lastest_down_diver_experimental_price=''
         self.lastest_down_diver_control_price=''
+        
 
         #init method call
         if op_type == 'batch':
@@ -35,12 +47,12 @@ class DataModel():
 
             self.cal_lastest_upper_divergence()
             self.cal_lastest_down_divergence()
-            self.print_cur_divergence()
+            self.print_lastest_divergence()
             
         else: #realtime use async 
             print('realtime type model start')
 
-    def print_cur_divergence(self):
+    def print_lastest_divergence(self):
         print("가장 최근의 {}봉 상승 다이버".format(self.periods))
         print("기준:"+ self.lastest_upper_diver_experimental_datetime + '/rsi:' + self.lastest_upper_diver_experimental_rsi + '/low:' + self.lastest_upper_diver_experimental_price)
         print("비교:"+ self.lastest_upper_diver_control_datetime + '/rsi:' + self.lastest_upper_diver_control_rsi + '/low:' + self.lastest_upper_diver_control_price)
@@ -90,7 +102,58 @@ class DataModel():
 
     def get_cur_low(self):
         return self.df['low'].iloc[-1]
+    
+    
+    def get_cur_divergence(self, lower_barrier=30, upper_barrier=70, width=14, hop=7):
+        #bullish judge
+        for i in reversed(range(len(self.df.index)-2,len(self.df.index)-1)): #one time
+            if self.df['rsi'][i] > lower_barrier and \
+                self.df['rsi'][i] < self.df['rsi'][i+1] and self.df['rsi'][i] < self.df['rsi'][i-1] and \
+                    self.df['low'][i] < self.df['low'][i-1]:
+                for j in reversed(range(i-width,i-hop)):
+                    Verification=True
+                    for k in range(j,i):#must be the highest during the period. Verification!
+                        if self.df['low'][i] > self.df['low'][k]:
+                            Verification=False
+                            break
+                    if Verification == True and self.df['rsi'][j] < lower_barrier and \
+                        self.df['rsi'][j] < self.df['rsi'][j+1] and self.df['rsi'][j] < self.df['rsi'][j-1] and \
+                            self.df['low'][j] < self.df['low'][j-1] and \
+                                self.df['low'][i] < self.df['low'][j]:
+                                self.divergence=1
+                                self.cur_diver_experimental_datetime=str(self.df['datetime'][i])
+                                self.cur_diver_experimental_rsi=str(self.df['rsi'][i])
+                                self.cur_diver_experimental_price=str(self.df['low'][i])  
+                                self.cur_diver_control_datetime=str(self.df['datetime'][j])
+                                self.cur_diver_control_rsi=str(self.df['rsi'][j])
+                                self.cur_diver_control_price=str(self.df['low'][j])
+                                return
 
+
+
+        #bearish judge
+        for i in reversed(range(len(self.df.index)-2,len(self.df.index)-1)): #one time
+            if self.df['rsi'][i] < upper_barrier and \
+                self.df['rsi'][i] > self.df['rsi'][i+1] and self.df['rsi'][i] > self.df['rsi'][i-1] and \
+                    self.df['high'][i] > self.df['high'][i-1]:
+                for j in reversed(range(i-width,i-hop)):
+                    Verification=True
+                    for k in range(j,i):#must be the highest during the period. Verification!
+                        if self.df['high'][i] <= self.df['high'][k]:
+                            Verification=False
+                            break
+                    if Verification == True and self.df['rsi'][j] > upper_barrier and \
+                        self.df['rsi'][j] > self.df['rsi'][j+1] and self.df['rsi'][j] > self.df['rsi'][j-1] and \
+                            self.df['high'][j] > self.df['high'][j-1] and \
+                                self.df['high'][i] > self.df['high'][j]:
+                                self.divergence=-1
+                                self.cur_diver_experimental_datetime=str(self.df['datetime'][i])
+                                self.cur_diver_experimental_rsi=str(self.df['rsi'][i])
+                                self.cur_diver_experimental_price=str(self.df['low'][i])  
+                                self.cur_diver_control_datetime=str(self.df['datetime'][j])
+                                self.cur_diver_control_rsi=str(self.df['rsi'][j])
+                                self.cur_diver_control_price=str(self.df['low'][j])
+                                return 
 
     #calculate rsi
     def calc_rsi(self, periods=14, ema=True):
