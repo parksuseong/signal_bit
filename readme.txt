@@ -1,5 +1,7 @@
 #make by parksuseong
 
+
+
 todo list
 1. signal in batch
 2. signal in realtime
