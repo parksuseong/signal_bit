@@ -1,11 +1,12 @@
 import DataModel
 import TelegramModel
 
-def get_rsi_message(periods):
-    dm_instance = DataModel.DataModel(periods=periods)
+def get_rsi_message(periods,market):
+    dm_instance = DataModel.DataModel(periods=periods, market=market)
     divergence = 0
     divergence = dm_instance.get_cur_divergence()
     periods = dm_instance.periods
+    market = dm_instance.market
     dm_instance.cur_diver_experimental_datetime
     dm_instance.cur_diver_control_datetime
     dm_instance.cur_diver_experimental_rsi
@@ -18,9 +19,9 @@ def get_rsi_message(periods):
     rsi_message = rsi_message + "비교:" + dm_instance.cur_diver_control_datetime + "/price:" + dm_instance.cur_diver_control_price + "/rsi:" + dm_instance.cur_diver_control_rsi
 
     if divergence == 1 :#upper
-        return periods + "봉 상승 다이버 포착 \n" + rsi_message
+        return market + " " + periods + "봉 상승 다이버 포착 \n" + rsi_message
     elif divergence == -1:
-        return periods + "봉 하락 다이버 포착 \n" + rsi_message
+        return market + " " + periods + "봉 하락 다이버 포착 \n" + rsi_message
     else:
         return ""
     
@@ -28,8 +29,9 @@ def get_rsi_message(periods):
 if __name__ == '__main__':
     bot = TelegramModel.TelegramModel()
     for period in ['5m','15m','30m','1h','4h']:
-        text = get_rsi_message(period)
-        if text != "":
-            bot.send_message(text)
+        for market in ['BTC/USDT','XRP/USDT','ETH/USDT','LINK/USDT']:
+            text = get_rsi_message(period,market)
+            if text != "":
+                bot.send_message(text)
 
 
