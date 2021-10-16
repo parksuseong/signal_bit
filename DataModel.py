@@ -6,9 +6,10 @@ import pandas as pd
 
 class DataModel():
 
-    def __init__(self, periods='1d', op_type='batch'):
+    def __init__(self, periods='1d', op_type='batch', market='BTC/USDT'):
         self.binance = ccxt.binance()
         self.periods = periods
+        self.market = market
         
         #current divergence variable
         self.divergence=0 #zero not, plus upper, minus down
@@ -69,9 +70,9 @@ class DataModel():
     def save_df_csv(self):
         self.df.to_csv("result.csv",header=True, index=False)
 
-    def get_origin_data(self, exchange='binance'):
+    def get_origin_data(self):
         #현재는 exchange가 바낸만 구현
-        ohlcvs = self.binance.fetch_ohlcv('BTC/USDT', self.periods)
+        ohlcvs = self.binance.fetch_ohlcv(self.market, self.periods)
         #일자, 시가, 고가, 저가, 종가, 거래량
         df = pd.DataFrame(ohlcvs, columns=['datetime', 'open', 'high', 'low', 'close', 'volume'])
         df['datetime'] = pd.to_datetime(df['datetime'], unit='ms')
