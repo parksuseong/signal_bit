@@ -10,3 +10,4 @@ todo list
 4. bit and alt coin
 
 5. auto trading system
+6. predict
