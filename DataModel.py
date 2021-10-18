@@ -53,6 +53,10 @@ class DataModel():
         else: #realtime use async 
             print('realtime type model start')
 
+    def run(self):
+        # to do list
+        # 다이버알림 과매수, 과매도
+        
     def print_lastest_divergence(self):
         print("가장 최근의 {}봉 상승 다이버".format(self.periods))
         print("기준:"+ self.lastest_upper_diver_experimental_datetime + '/rsi:' + self.lastest_upper_diver_experimental_rsi + '/low:' + self.lastest_upper_diver_experimental_price)
